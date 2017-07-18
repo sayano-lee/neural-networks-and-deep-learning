@@ -10,12 +10,13 @@ easily modifiable.  It is not optimized, and omits many desirable
 features.
 
 """
-
+from __future__ import division
 #### Libraries
 # Standard library
 import json
 import random
 import sys
+
 
 # Third-party libraries
 import numpy as np
@@ -127,7 +128,7 @@ class Network(object):
         return a
 
     def SGD(self, training_data, epochs, mini_batch_size, eta,
-            lmbda=0.0, delta_accuuracy=10,
+            lmbda=0.0, early_stopping = 8,
             evaluation_data=None,
             monitor_evaluation_cost=False,
             monitor_evaluation_accuracy=False,
@@ -161,7 +162,7 @@ class Network(object):
         pre_accuracy = 0.0
         this_accuracy = 0.0
         eta_decay_factor = 0
-        stop_epochs = False
+        # stop_epochs = False
 
         for j in xrange(epochs):
             random.shuffle(training_data)
@@ -171,18 +172,23 @@ class Network(object):
             for mini_batch in mini_batches:
                 self.update_mini_batch(
                     mini_batch, eta, lmbda, len(training_data))
-                # print 'already here'
-                # adjust learning-rate
-                if abs(this_accuracy - pre_accuracy) < delta_accuuracy:
-                    eta_decay_factor = eta_decay_factor + 1
-                    print 'eta_decay_factor now is {}'.format(eta_decay_factor)
-                    print 'this_accuracy now is {}'.format(this_accuracy)
-                if eta_decay_factor >= 8:
-                    print 'satisfy rule , exit'
-                    stop_epochs = True
-                    break
 
             print "Epoch {} training complete".format(j)
+            
+            # adjust learning-rate
+            this_accuracy = round(self.accuracy(training_data, convert=True)/len(training_data),2)
+            if 100*this_accuracy < 100*pre_accuracy:
+                eta_decay_factor = eta_decay_factor + 1
+                eta = eta/(2**eta_decay_factor)
+                print 'eta now is {}'.format(eta)
+                print 'eta_decay_factor now is {}'.format(eta_decay_factor)
+                print 'this_accuracy now is {}'.format(this_accuracy)
+            pre_accuracy = this_accuracy
+            if eta_decay_factor >= early_stopping:
+                print 'satisfy rule , exit'
+                # stop_epochs = True
+                break
+
             if monitor_training_cost:
                 cost = self.total_cost(training_data, lmbda)
                 training_cost.append(cost)
@@ -190,8 +196,8 @@ class Network(object):
             if monitor_training_accuracy:
                 accuracy = self.accuracy(training_data, convert=True)
                 training_accuracy.append(accuracy)
-                print "Accuracy on training data: {} / {}".format(
-                    accuracy, n)
+                print "Accuracy on training data: {} / {} approximate {}".format(
+                    accuracy, n, accuracy/n)
             if monitor_evaluation_cost:
                 cost = self.total_cost(evaluation_data, lmbda, convert=True)
                 evaluation_cost.append(cost)
