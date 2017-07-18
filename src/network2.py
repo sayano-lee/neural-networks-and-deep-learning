@@ -172,14 +172,13 @@ class Network(object):
             for mini_batch in mini_batches:
                 self.update_mini_batch(
                     mini_batch, eta, lmbda, len(training_data))
-                
                 # adjust learning-rate
                 if eta_decay_factor >= 8:
                     print 'iteration satisfied no-improvement rule , exit'
                     stop_epochs = True
                     break
                 this_accuracy = self.accuracy(training_data, convert=True)
-                if abs(this.accuracy-pre_accuracy) < delta_accuuracy:
+                if abs(this_accuracy - pre_accuracy) < delta_accuuracy:
                     isStopCnt++
                     if isStopCnt > 10 and eta_decay_factor < 8:
                         eta_decay_factor++
@@ -187,7 +186,6 @@ class Network(object):
                 else:
                     isStopCnt = 0
                 pre_accuracy = this_accuracy
-
             if not stop_epochs:
                 print "Epoch %s training complete" % j
                 if monitor_training_cost:
@@ -222,7 +220,7 @@ class Network(object):
         """
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
-        print "weights and biases already set to zeroes"
+        # print "weights and biases already set to zeroes"
         for x, y in mini_batch:
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
