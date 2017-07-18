@@ -81,7 +81,7 @@ class Network(object):
         self.num_layers = len(sizes)
         self.sizes = sizes
         self.default_weight_initializer()
-        self.cost=cost
+        self.cost = cost
 
     def default_weight_initializer(self):
         """Initialize each weight using a Gaussian distribution with mean 0
@@ -197,6 +197,7 @@ class Network(object):
         """
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
+        # print "weights and biases already set to zeroes"
         for x, y in mini_batch:
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
@@ -283,8 +284,12 @@ class Network(object):
             a = self.feedforward(x)
             if convert: y = vectorized_result(y)
             cost += self.cost.fn(a, y)/len(data)
-        cost += 0.5*(lmbda/len(data))*sum(
-            np.linalg.norm(w)**2 for w in self.weights)
+        # l2 normalization
+        # cost += 0.5*(lmbda/len(data))*sum(
+        #     np.linalg.norm(w)**2 for w in self.weights)
+        # l1 normalization
+        cost += (lmbda/len(data))*sum(
+            np.linalg.norm(w) for w in self.weights)
         return cost
 
     def save(self, filename):

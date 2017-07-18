@@ -42,7 +42,7 @@ import theano.tensor as T
 from theano.tensor.nnet import conv
 from theano.tensor.nnet import softmax
 from theano.tensor import shared_randomstreams
-from theano.tensor.signal import downsample
+from theano.tensor.signal import pool
 
 # Activation functions for neurons
 def linear(z): return z
@@ -73,18 +73,23 @@ def load_data_shared(filename="../data/mnist.pkl.gz"):
         the data to the GPU, if one is available.
 
         """
+        ### actual images
         shared_x = theano.shared(
             np.asarray(data[0], dtype=theano.config.floatX), borrow=True)
+        ### labels
         shared_y = theano.shared(
             np.asarray(data[1], dtype=theano.config.floatX), borrow=True)
         return shared_x, T.cast(shared_y, "int32")
+    ### process three kinds of data
     return [shared(training_data), shared(validation_data), shared(test_data)]
 
 #### Main class used to construct and train networks
 class Network(object):
 
     def __init__(self, layers, mini_batch_size):
-        """Takes a list of `layers`, describing the network architecture, and
+        """
+
+        Takes a list of `layers`, describing the network architecture, and
         a value for the `mini_batch_size` to be used during training
         by stochastic gradient descent.
 
@@ -230,7 +235,7 @@ class ConvPoolLayer(object):
         conv_out = conv.conv2d(
             input=self.inpt, filters=self.w, filter_shape=self.filter_shape,
             image_shape=self.image_shape)
-        pooled_out = downsample.max_pool_2d(
+        pooled_out = pool.pool_2d(
             input=conv_out, ds=self.poolsize, ignore_border=True)
         self.output = self.activation_fn(
             pooled_out + self.b.dimshuffle('x', 0, 'x', 'x'))
