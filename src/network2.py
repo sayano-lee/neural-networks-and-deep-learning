@@ -170,7 +170,11 @@ class Network(object):
                 for k in xrange(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
                 self.update_mini_batch(
+<<<<<<< HEAD
                     mini_batch, eta, lmbda, len(training_data)) 
+=======
+                    mini_batch, eta, lmbda, len(training_data))
+>>>>>>> 5647a6d240a7da79324be77ecfe05bf7889cf145
                 # adjust learning-rate
                 if eta_decay_factor >= 8:
                     print 'iteration satisfied no-improvement rule , exit'
@@ -178,7 +182,11 @@ class Network(object):
                     break
                 this_accuracy = self.accuracy(training_data, convert=True)
                 if abs(this_accuracy - pre_accuracy) < delta_accuuracy:
+<<<<<<< HEAD
                     isStopCnt += 1
+=======
+                    isStopCnt++
+>>>>>>> 5647a6d240a7da79324be77ecfe05bf7889cf145
                     if isStopCnt > 10 and eta_decay_factor < 8:
                         eta_decay_factor += 1
                         eta = eta/(2**eta_decay_factor)
