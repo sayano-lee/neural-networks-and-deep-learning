@@ -127,7 +127,7 @@ class Network(object):
         return a
 
     def SGD(self, training_data, epochs, mini_batch_size, eta,
-            lmbda = 0.0,
+            lmbda=0.0, delta_accuuracy = 0.1%,
             evaluation_data=None,
             monitor_evaluation_cost=False,
             monitor_evaluation_accuracy=False,
@@ -156,6 +156,14 @@ class Network(object):
         n = len(training_data)
         evaluation_cost, evaluation_accuracy = [], []
         training_cost, training_accuracy = [], []
+        
+        # variables for detecting wheather to stop iterations
+        pre_accuracy = np.lscalar(0)
+        this_accuracy = np.lscalar('this_accuracy')
+        isStopCnt = 0
+        eta_decay_factor = 0
+        stop_epochs = False
+        
         for j in xrange(epochs):
             random.shuffle(training_data)
             mini_batches = [
@@ -164,26 +172,43 @@ class Network(object):
             for mini_batch in mini_batches:
                 self.update_mini_batch(
                     mini_batch, eta, lmbda, len(training_data))
-            print "Epoch %s training complete" % j
-            if monitor_training_cost:
-                cost = self.total_cost(training_data, lmbda)
-                training_cost.append(cost)
-                print "Cost on training data: {}".format(cost)
-            if monitor_training_accuracy:
-                accuracy = self.accuracy(training_data, convert=True)
-                training_accuracy.append(accuracy)
-                print "Accuracy on training data: {} / {}".format(
-                    accuracy, n)
-            if monitor_evaluation_cost:
-                cost = self.total_cost(evaluation_data, lmbda, convert=True)
-                evaluation_cost.append(cost)
-                print "Cost on evaluation data: {}".format(cost)
-            if monitor_evaluation_accuracy:
-                accuracy = self.accuracy(evaluation_data)
-                evaluation_accuracy.append(accuracy)
-                print "Accuracy on evaluation data: {} / {}".format(
-                    self.accuracy(evaluation_data), n_data)
-            print
+                
+                # adjust learning-rate
+                if eta_decay_factor >= 8:
+                    print 'iteration satisfied no-improvement rule , exit'
+                    stop_epochs = True
+                    break
+                this_accuracy = self.accuracy(training_data, convert=True)
+                if abs(this.accuracy-pre_accuracy) < delta_accuuracy:
+                    isStopCnt++
+                    if isStopCnt > 10 and eta_decay_factor < 8:
+                        eta_decay_factor++
+                        eta = eta/(2**eta_decay_factor)
+                else:
+                    isStopCnt = 0
+                pre_accuracy = this_accuracy
+
+            if not stop_epochs:
+                print "Epoch %s training complete" % j
+                if monitor_training_cost:
+                    cost = self.total_cost(training_data, lmbda)
+                    training_cost.append(cost)
+                    print "Cost on training data: {}".format(cost)
+                if monitor_training_accuracy:
+                    accuracy = self.accuracy(training_data, convert=True)
+                    training_accuracy.append(accuracy)
+                    print "Accuracy on training data: {} / {}".format(
+                        accuracy, n)
+                if monitor_evaluation_cost:
+                    cost = self.total_cost(evaluation_data, lmbda, convert=True)
+                    evaluation_cost.append(cost)
+                    print "Cost on evaluation data: {}".format(cost)
+                if monitor_evaluation_accuracy:
+                    accuracy = self.accuracy(evaluation_data)
+                    evaluation_accuracy.append(accuracy)
+                    print "Accuracy on evaluation data: {} / {}".format(
+                        self.accuracy(evaluation_data), n_data)
+                print
         return evaluation_cost, evaluation_accuracy, \
             training_cost, training_accuracy
 
@@ -197,7 +222,7 @@ class Network(object):
         """
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
-        # print "weights and biases already set to zeroes"
+        print "weights and biases already set to zeroes"
         for x, y in mini_batch:
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
