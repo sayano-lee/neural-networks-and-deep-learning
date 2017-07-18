@@ -127,7 +127,7 @@ class Network(object):
         return a
 
     def SGD(self, training_data, epochs, mini_batch_size, eta,
-            lmbda=0.0, delta_accuuracy = 0.1,
+            lmbda=0.0, delta_accuuracy = 10,
             evaluation_data=None,
             monitor_evaluation_cost=False,
             monitor_evaluation_accuracy=False,
@@ -170,50 +170,43 @@ class Network(object):
                 for k in xrange(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
                 self.update_mini_batch(
-<<<<<<< HEAD
-                    mini_batch, eta, lmbda, len(training_data)) 
-=======
                     mini_batch, eta, lmbda, len(training_data))
->>>>>>> 5647a6d240a7da79324be77ecfe05bf7889cf145
+                # print 'already here'
                 # adjust learning-rate
-                if eta_decay_factor >= 8:
-                    print 'iteration satisfied no-improvement rule , exit'
-                    stop_epochs = True
-                    break
-                this_accuracy = self.accuracy(training_data, convert=True)
-                if abs(this_accuracy - pre_accuracy) < delta_accuuracy:
-<<<<<<< HEAD
-                    isStopCnt += 1
-=======
-                    isStopCnt++
->>>>>>> 5647a6d240a7da79324be77ecfe05bf7889cf145
-                    if isStopCnt > 10 and eta_decay_factor < 8:
-                        eta_decay_factor += 1
-                        eta = eta/(2**eta_decay_factor)
-                else:
-                    isStopCnt = 0
-                pre_accuracy = this_accuracy
-            if not stop_epochs:
-                print "Epoch %s training complete" % j
-                if monitor_training_cost:
-                    cost = self.total_cost(training_data, lmbda)
-                    training_cost.append(cost)
-                    print "Cost on training data: {}".format(cost)
-                if monitor_training_accuracy:
-                    accuracy = self.accuracy(training_data, convert=True)
-                    training_accuracy.append(accuracy)
-                    print "Accuracy on training data: {} / {}".format(
-                        accuracy, n)
-                if monitor_evaluation_cost:
-                    cost = self.total_cost(evaluation_data, lmbda, convert=True)
-                    evaluation_cost.append(cost)
-                    print "Cost on evaluation data: {}".format(cost)
-                if monitor_evaluation_accuracy:
-                    accuracy = self.accuracy(evaluation_data)
-                    evaluation_accuracy.append(accuracy)
-                    print "Accuracy on evaluation data: {} / {}".format(
-                        self.accuracy(evaluation_data), n_data)
-                print
+            #     if eta_decay_factor >= 8:
+            #         print 'iteration satisfied no-improvement rule , exit'
+            #         stop_epochs = True
+            #         break 
+            #     this_accuracy = self.accuracy(training_data, convert=True)
+            #     if abs(this_accuracy - pre_accuracy) < delta_accuuracy:
+            #         isStopCnt += 1
+            #         if isStopCnt > 10 and eta_decay_factor < 8:
+            #             eta_decay_factor += 1
+            #             eta = eta/(2**eta_decay_factor)
+            #     else:
+            #         isStopCnt = 0
+            #     pre_accuracy = this_accuracy
+            # print 'already here'
+            # if not stop_epochs:
+            print "Epoch %s training complete" % j
+            if monitor_training_cost:
+                cost = self.total_cost(training_data, lmbda)
+                training_cost.append(cost)
+                print "Cost on training data: {}".format(cost)
+            if monitor_training_accuracy:
+                accuracy = self.accuracy(training_data, convert=True)
+                training_accuracy.append(accuracy)
+                print "Accuracy on training data: {} / {}".format(
+                    accuracy, n)
+            if monitor_evaluation_cost:
+                cost = self.total_cost(evaluation_data, lmbda, convert=True)
+                evaluation_cost.append(cost)
+                print "Cost on evaluation data: {}".format(cost)
+            if monitor_evaluation_accuracy:
+                accuracy = self.accuracy(evaluation_data)
+                evaluation_accuracy.append(accuracy)
+                print "Accuracy on evaluation data: {} / {}".format(
+                    self.accuracy(evaluation_data), n_data)
         return evaluation_cost, evaluation_accuracy, \
             training_cost, training_accuracy
 
