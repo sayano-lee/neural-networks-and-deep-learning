@@ -127,7 +127,7 @@ class Network(object):
         return a
 
     def SGD(self, training_data, epochs, mini_batch_size, eta,
-            lmbda=0.0, delta_accuuracy = 0.1%,
+            lmbda=0.0, delta_accuuracy = 0.1,
             evaluation_data=None,
             monitor_evaluation_cost=False,
             monitor_evaluation_accuracy=False,
@@ -158,12 +158,11 @@ class Network(object):
         training_cost, training_accuracy = [], []
         
         # variables for detecting wheather to stop iterations
-        pre_accuracy = np.lscalar(0)
-        this_accuracy = np.lscalar('this_accuracy')
+        pre_accuracy = 0.0
+        this_accuracy = 0.0
         isStopCnt = 0
         eta_decay_factor = 0
-        stop_epochs = False
-        
+        stop_epochs = False 
         for j in xrange(epochs):
             random.shuffle(training_data)
             mini_batches = [
@@ -171,23 +170,21 @@ class Network(object):
                 for k in xrange(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
                 self.update_mini_batch(
-                    mini_batch, eta, lmbda, len(training_data))
-                
+                    mini_batch, eta, lmbda, len(training_data)) 
                 # adjust learning-rate
                 if eta_decay_factor >= 8:
                     print 'iteration satisfied no-improvement rule , exit'
                     stop_epochs = True
                     break
                 this_accuracy = self.accuracy(training_data, convert=True)
-                if abs(this.accuracy-pre_accuracy) < delta_accuuracy:
-                    isStopCnt++
+                if abs(this_accuracy - pre_accuracy) < delta_accuuracy:
+                    isStopCnt += 1
                     if isStopCnt > 10 and eta_decay_factor < 8:
-                        eta_decay_factor++
+                        eta_decay_factor += 1
                         eta = eta/(2**eta_decay_factor)
                 else:
                     isStopCnt = 0
                 pre_accuracy = this_accuracy
-
             if not stop_epochs:
                 print "Epoch %s training complete" % j
                 if monitor_training_cost:
@@ -222,7 +219,7 @@ class Network(object):
         """
         nabla_b = [np.zeros(b.shape) for b in self.biases]
         nabla_w = [np.zeros(w.shape) for w in self.weights]
-        print "weights and biases already set to zeroes"
+        # print "weights and biases already set to zeroes"
         for x, y in mini_batch:
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
             nabla_b = [nb+dnb for nb, dnb in zip(nabla_b, delta_nabla_b)]
